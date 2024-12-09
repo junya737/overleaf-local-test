@@ -1,0 +1,143 @@
+\documentclass[a4j,onecolumn,10pt]{jresume}
+\usepackage{graphicx,array,enumerate}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{amssymb}
+\usepackage{algorithmic,algorithm}
+% \usepackage{otf}
+\usepackage[justification=centering]{caption}
+\usepackage[dvipdfmx]{color} %pdf表示に必要
+\usepackage{longtable}
+\usepackage{url}
+
+\newcommand{\argmax}{\mathop{\rm arg~max}\limits}
+\newcommand{\argmin}{\mathop{\rm arg~min}\limits}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{theorem}
+\newtheorem{theo}{Theorem}[section]
+\newtheorem{defi}[theo]{Definition}
+\newtheorem{lemm}[theo]{Lemma}
+
+\makeatletter
+ \def\@cite#1{\textsuperscript{#1)}}
+ \def\@biblabel#1{#1)}
+\makeatother
+
+\setlength{\abovecaptionskip}{0pt}
+\setlength{\belowcaptionskip}{0pt}
+
+%%%%%%  TEMPLATE START   %%%%%%
+\pagestyle{myresume}
+
+
+%%%%%%       DATE        %%%%%%
+
+\hoffset 0pt%水平方向のオフセット
+\oddsidemargin 0pt%奇数ページのマージン
+\textwidth 455pt%文章領域の幅
+\textheight 680pt%文章領域の高さ
+
+\begin{document}
+\renewcommand{\refname}{References}
+\renewcommand{\abstractname}{Abstract}
+%
+%%%%%        TITLE        %%%%%
+\medskip
+\begin{center}
+{\Large 統合動的システム論レポート課題（１）}
+\end{center}
+
+%
+\begin{flushright}
+システム科学コース \\
+6930-35-9987 \\
+井平淳也 \\
+\end{flushright}
+\medskip
+%%%%%%     TEXT START     %%%%%
+%
+
+
+%%%%%%      BODY STARY  %%%%%
+
+\section{課題内容}\label{sec:intro}
+各自、興味深い離散時間最適制御問題を具体的に定式化せよ。簡単でも良いが、線形システム2次評価関数は除く。
+
+※定式化：状態ベクトルと制御入力ベクトルを定義し、状態方程式と評価関数の具体的な数式を与えること。
+
+※解答は、PDFや画像等の添付やテキストボックスへの入力を適宜併用して提出すること。
+
+\section{解答}
+感染症モデルのSIRモデルを題材とした．
+SIRモデルは，物質収支式から導かれる微分方程式であり，感染症のモデリングに利用される．
+ある時刻$t$における未感染者数を$S_t$，感染者数を$I_t$，回復者数を$R_t$とすると，離散的なSIRモデルは以下のように表される．
+
+\begin{eqnarray}
+    S_{t+1} &=& S_t - \beta S_tI_t -v_t\\
+    I_{t+1} &=& I_t + \beta S_tI_t - \gamma I_t -q_t\\
+   R_{t+1} &=& R_t - \gamma I_t +v_t + q_t
+\end{eqnarray}
+ここで，$\beta$は，単位時間の人口あたりの感染率を表し，$\gamma$は，単位時間の感染者の回復率を表す．
+$v_t$はある時刻のワクチン接種者数を表し，$q_t$はある時刻の隔離者の数を表す．
+$v_t$，$q_t$は感染症拡大を食い止めるための制御入力として考えられるため，制御入力ベクトル$\mathbf{u}_t$は以下のように表される．
+\begin{eqnarray}
+\mathbf{u}_t =
+    \begin{bmatrix}
+    v_t \\ q_t
+    \end{bmatrix}
+\end{eqnarray}
+状態ベクトルを
+$\mathbf{x}_t =
+    \begin{bmatrix}
+    S_t \\
+    I_t \\
+    R_t
+    \end{bmatrix}$とすると，状態方程式は以下のように与えられる．
+
+\begin{eqnarray}
+\mathbf{x}_{t+1} = \mathbf{x}_{t}
++
+\begin{bmatrix}
+	\beta S_t I_t \\
+\beta S_t I_t - \gamma I_t  \\
+\gamma I_t 
+\end{bmatrix}
++
+B \mathbf{u}_t
+\end{eqnarray}   
+ここで，$B = \begin{bmatrix}
+    -1 & 0 \\
+    0 & -1 \\
+    1 & 1
+\end{bmatrix}$である．
+この制御で最小化したいものは，合計の感染者数と合計の制御入力によるコストである．
+そのため，評価関数は以下のように設定できる．
+\begin{eqnarray}
+    J = \sum_{t=0}^{T} \big( \mathbf{x}_t^\top Q \mathbf{x}_t + \mathbf{u}_t^\top R \mathbf{u}_t \big) \label{eq:J}
+\end{eqnarray}
+ここで，$Q = \begin{bmatrix}
+    0 & 0 & 0\\
+    0 & \lambda_I & 0 \\
+    0 & 0 & 0
+\end{bmatrix}$，$R = \begin{bmatrix}
+    \lambda_v & 0 \\
+    0 & \lambda_q \\
+\end{bmatrix}$である．
+$\lambda_I$は感染者数に対する重み，$\lambda_v$はワクチン接種のコストに関する重み，$\lambda_q$隔離政策のコストに関する重みである．
+
+状態ベクトルの制約条件は以下のようになる．
+\begin{eqnarray}  
+S_t, I_t, R_t \geq 0, \quad S_t + I_t + R_t = N
+\end{eqnarray}
+ここで，$N$は全人口数である．制御入力の制約条件は以下のようになる．
+\begin{eqnarray}  
+0 \leq v_t\leq V_{\text{max}}, \quad 0 \leq q_t \leq Q_{\text{max}}
+\end{eqnarray}
+$V_{\text{max}}$は単位時間あたりのワクチン接種数の最大値，$Q_{\text{max}}$は単位時間あたりに隔離可能な人数の最大値である．
+これらの制約条件を満たしつつ，式\ref{eq:J}の評価関数を最小化する制御入力ベクトル$\mathbf{u}_t$を求めることが，本制御問題の目的となる．
+これができれば，コストを抑えつつ感染拡大も防げるような施策の立案が可能になるだろう．
+
+%=============================%
+\end{document}
